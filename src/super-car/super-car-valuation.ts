@@ -33,7 +33,6 @@ export async function fetchValuationFromSuperCarValuation(
     const err = error as {
       message: string;
     }
-    console.error();
-    throw new Error(`Failed to fetch valuation from SuperCar API error for VRM ${vrm}: ${err.message}`);
+    throw new Error(`Failed to fetch valuation from SuperCar API, error for VRM ${vrm}: ${err.message}`);
   }
 }

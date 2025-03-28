@@ -4,6 +4,7 @@ import { fetchValuationFromSuperCarValuation } from '@app/super-car/super-car-va
 import { trackRequest, shouldFailover } from '@app/utils/failure-tracker';
 import { VehicleValuation } from '@app/models/vehicle-valuation';
 import { saveProviderLog } from '@app/utils/provider-logs';
+import { fetchValuationFromPremiumCarValuation } from '@app/premium-car/premium-car-valuation';
 
 export function valuationRoutes(fastify: FastifyInstance) {
   fastify.get<{
@@ -66,15 +67,12 @@ export function valuationRoutes(fastify: FastifyInstance) {
     }
 
     // Fetch valuation with failover logic
-    // let providerName = 'SuperCar Valuations';
     let responseCode = 200;
     const startTime = Date.now();
 
     try {
-      if (shouldFailover()) {
-        console.log('shouldFailover = true');
-        
-        // valuation = await fetchValuationFromPremiumCarValuation(vrm, mileage);
+      if (shouldFailover()) {        
+        valuation = await fetchValuationFromPremiumCarValuation(vrm);
       } else {
         valuation = await fetchValuationFromSuperCarValuation(vrm, mileage);
         trackRequest(true);
@@ -85,8 +83,7 @@ export function valuationRoutes(fastify: FastifyInstance) {
       console.error(`Error fetching valuation for ${vrm}:`, error);
 
       if (shouldFailover()) {
-        console.log('shouldFailover = true');
-        // valuation = await fetchValuationFromPremiumCarValuation(vrm, mileage);
+        valuation = await fetchValuationFromPremiumCarValuation(vrm);
       } else {
         return reply.code(503).send({ message: 'Service Unavailable', statusCode: 503 });
       }

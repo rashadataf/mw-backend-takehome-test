@@ -12,7 +12,7 @@ export class VehicleValuation {
   highestValue: number;
 
   @Column({ type: 'text', nullable: false })
-  provider: string; 
+  provider: string;
 
   get midpointValue(): number {
     return (this.highestValue + this.lowestValue) / 2;
