@@ -1,7 +1,9 @@
 import { FastifyInstance } from 'fastify';
 import { VehicleValuationRequest } from './types/vehicle-valuation-request';
 import { fetchValuationFromSuperCarValuation } from '@app/super-car/super-car-valuation';
+import { trackRequest, shouldFailover } from '@app/utils/failure-tracker';
 import { VehicleValuation } from '@app/models/vehicle-valuation';
+import { saveProviderLog } from '@app/utils/provider-logs';
 
 export function valuationRoutes(fastify: FastifyInstance) {
   fastify.get<{
@@ -57,16 +59,53 @@ export function valuationRoutes(fastify: FastifyInstance) {
         });
     }
 
-    const valuation = await fetchValuationFromSuperCarValuation(vrm, mileage);
+    // Check if valuation exists (to prevent unnecessary API calls)
+    let valuation = await valuationRepository.findOneBy({ vrm: vrm });
+    if (valuation) {
+      return valuation;
+    }
 
-    // Save to DB.
-    await valuationRepository.insert(valuation).catch((err) => {
-      if (err.code !== 'SQLITE_CONSTRAINT') {
-        throw err;
+    // Fetch valuation with failover logic
+    // let providerName = 'SuperCar Valuations';
+    let responseCode = 200;
+    const startTime = Date.now();
+
+    try {
+      if (shouldFailover()) {
+        console.log('shouldFailover = true');
+        
+        // valuation = await fetchValuationFromPremiumCarValuation(vrm, mileage);
+      } else {
+        valuation = await fetchValuationFromSuperCarValuation(vrm, mileage);
+        trackRequest(true);
       }
-    });
+    } catch (error) {
+      trackRequest(false); // Mark failure
+      responseCode = 503;
+      console.error(`Error fetching valuation for ${vrm}:`, error);
 
-    fastify.log.info('Valuation created: ', valuation);
+      if (shouldFailover()) {
+        console.log('shouldFailover = true');
+        // valuation = await fetchValuationFromPremiumCarValuation(vrm, mileage);
+      } else {
+        return reply.code(503).send({ message: 'Service Unavailable', statusCode: 503 });
+      }
+    }
+
+    if (!valuation) {
+      return null;
+    }
+    try {
+      await valuationRepository.insert(valuation);
+    } catch (error: unknown) {
+      const err = error as {
+        code: string;
+      };
+      if (err.code !== 'SQLITE_CONSTRAINT') throw err;
+    }
+
+    // Log request details
+    await saveProviderLog(fastify, vrm, valuation.provider, startTime, Date.now(), responseCode);
 
     return valuation;
   });

@@ -131,6 +131,7 @@ describe('ValuationController (e2e)', () => {
         vrm: 'ABC123',
         lowestValue: 10000.0,
         highestValue: 20000.0,
+        provider: '',
         get midpointValue() {
           return (this.highestValue + this.lowestValue) / 2;
         },
