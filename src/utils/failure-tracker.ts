@@ -1,53 +1,64 @@
-const FAILURE_THRESHOLD = 0.5; // 50% failure rate
-const FAILOVER_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+export class FailureTracker {
+    private totalRequests: number;
+    private failedRequests: number;
+    private failoverActive: boolean;
+    private failoverStartTime: number | null;
+    private readonly FAILURE_THRESHOLD: number;
+    private readonly FAILOVER_DURATION_MS: number;
 
-let totalRequests = 0;
-let failedRequests = 0;
-let failoverActive = false;
-let failoverStartTime: number | null = null;
-
-/**
- * Track a request's success or failure.
- * @param success Whether the request was successful
- */
-export function trackRequest(success: boolean) {
-    totalRequests++;
-
-    if (!success) {
-        failedRequests++;
+    constructor(failureThreshold = 0.5, failoverDurationMs = 5 * 60 * 1000) {
+        this.totalRequests = 0;
+        this.failedRequests = 0;
+        this.failoverActive = false;
+        this.failoverStartTime = null;
+        this.FAILURE_THRESHOLD = failureThreshold;
+        this.FAILOVER_DURATION_MS = failoverDurationMs;
     }
 
-    if (shouldFailover() && !failoverActive) {
-        failoverActive = true;
-        failoverStartTime = Date.now();
-        console.warn("Failover activated! Using Premium Car Valuations.");
-    }
-}
+    /**
+     * Tracks a request's success or failure.
+     * @param success Whether the request was successful
+     */
+    trackRequest(success: boolean) {
+        this.totalRequests++;
 
-/**
- * Check if the service should failover to the premium provider.
- * @returns boolean
- */
-export function shouldFailover(): boolean {
-    if (failoverActive) {
-        const elapsed = Date.now() - (failoverStartTime || 0);
-        if (elapsed > FAILOVER_DURATION_MS) {
-            console.info("Failover period expired. Resetting failure tracker.");
-            resetFailureTracker();
-            return false;
+        if (!success) {
+            this.failedRequests++;
         }
-        return true;
+
+        if (this.shouldFailover() && !this.failoverActive) {
+            this.failoverActive = true;
+            this.failoverStartTime = Date.now();
+            console.warn("Failover activated! Using Premium Car Valuations.");
+        }
     }
 
-    return totalRequests > 0 && failedRequests / totalRequests > FAILURE_THRESHOLD;
-}
+    /**
+     * Determines if the service should failover.
+     * @returns boolean
+     */
+    shouldFailover(): boolean {
+        if (this.failoverActive) {
+            const elapsed = Date.now() - (this.failoverStartTime || 0);
+            if (elapsed > this.FAILOVER_DURATION_MS) {
+                console.info("Failover period expired. Resetting failure tracker.");
+                this.resetFailureTracker();
+                return false;
+            }
+            return true;
+        }
 
-/**
- * Resets the failure tracker stats (used after failover expiration).
- */
-export function resetFailureTracker() {
-    totalRequests = 0;
-    failedRequests = 0;
-    failoverActive = false;
-    failoverStartTime = null;
+        return this.totalRequests > 0 &&
+            this.failedRequests / this.totalRequests > this.FAILURE_THRESHOLD;
+    }
+
+    /**
+     * Resets the failure tracker stats (used after failover expiration).
+     */
+    resetFailureTracker() {
+        this.totalRequests = 0;
+        this.failedRequests = 0;
+        this.failoverActive = false;
+        this.failoverStartTime = null;
+    }
 }

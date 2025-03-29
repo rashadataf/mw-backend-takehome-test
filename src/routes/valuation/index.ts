@@ -1,10 +1,12 @@
 import { FastifyInstance } from 'fastify';
 import { VehicleValuationRequest } from './types/vehicle-valuation-request';
 import { fetchValuationFromSuperCarValuation } from '@app/super-car/super-car-valuation';
-import { trackRequest, shouldFailover } from '@app/utils/failure-tracker';
+import { FailureTracker } from '@app/utils/failure-tracker';
 import { VehicleValuation } from '@app/models/vehicle-valuation';
 import { saveProviderLog } from '@app/utils/provider-logs';
 import { fetchValuationFromPremiumCarValuation } from '@app/premium-car/premium-car-valuation';
+
+const failureTracker = new FailureTracker();
 
 export function valuationRoutes(fastify: FastifyInstance) {
   fastify.get<{
@@ -71,18 +73,18 @@ export function valuationRoutes(fastify: FastifyInstance) {
     const startTime = Date.now();
 
     try {
-      if (shouldFailover()) {        
+      if (failureTracker.shouldFailover()) {
         valuation = await fetchValuationFromPremiumCarValuation(vrm);
       } else {
         valuation = await fetchValuationFromSuperCarValuation(vrm, mileage);
-        trackRequest(true);
+        failureTracker.trackRequest(true);
       }
     } catch (error) {
-      trackRequest(false); // Mark failure
+      failureTracker.trackRequest(false); // Mark failure
       responseCode = 503;
       console.error(`Error fetching valuation for ${vrm}:`, error);
 
-      if (shouldFailover()) {
+      if (failureTracker.shouldFailover()) {
         valuation = await fetchValuationFromPremiumCarValuation(vrm);
       } else {
         return reply.code(503).send({ message: 'Service Unavailable', statusCode: 503 });

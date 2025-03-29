@@ -129,12 +129,10 @@ describe('ValuationController (e2e)', () => {
     it('should return 200 with valuation data if VRM exists', async () => {
       const mockValuation: VehicleValuation = {
         vrm: 'ABC123',
-        lowestValue: 10000.0,
-        highestValue: 20000.0,
-        provider: '',
-        get midpointValue() {
-          return (this.highestValue + this.lowestValue) / 2;
-        },
+        lowestValue: 10000,
+        highestValue: 20000,
+        provider: 'SuperCar Valuations',
+        midpointValue: 15000
       };
 
       (mockRepository.findOneBy as Mock).mockResolvedValue(mockValuation);
