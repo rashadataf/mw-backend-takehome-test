@@ -29,7 +29,6 @@ export class FailureTracker {
         if (this.shouldFailover() && !this.failoverActive) {
             this.failoverActive = true;
             this.failoverStartTime = Date.now();
-            console.warn("Failover activated! Using Premium Car Valuations.");
         }
     }
 
@@ -41,7 +40,6 @@ export class FailureTracker {
         if (this.failoverActive) {
             const elapsed = Date.now() - (this.failoverStartTime || 0);
             if (elapsed > this.FAILOVER_DURATION_MS) {
-                console.info("Failover period expired. Resetting failure tracker.");
                 this.resetFailureTracker();
                 return false;
             }

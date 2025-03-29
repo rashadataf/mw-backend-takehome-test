@@ -24,5 +24,5 @@ export async function saveProviderLog(
     logEntry.responseCode = responseCode;
     logEntry.errorMessage = errorMessage;
 
-    await providerLogRepository.save(logEntry);
+    await providerLogRepository.insert(logEntry);
 }

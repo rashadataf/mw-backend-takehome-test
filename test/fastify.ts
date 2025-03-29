@@ -30,12 +30,6 @@ beforeAll(async () => {
   const mockRepository: Partial<Repository<VehicleValuation>> = {
     insert: vi.fn().mockResolvedValue({}),
     findOneBy: vi.fn(),
-    save: vi.fn().mockImplementation(async (entityOrEntities) => {
-      if (Array.isArray(entityOrEntities)) {
-        return entityOrEntities.map((entity) => ({ ...entity, id: Math.random() }));
-      }
-      return { ...entityOrEntities, id: Math.random() };
-    }),
   };
 
   vi.spyOn(fastify.orm, 'getRepository').mockReturnValue(mockRepository as Repository<VehicleValuation>);

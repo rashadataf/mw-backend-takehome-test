@@ -6,7 +6,7 @@ import { VehicleValuation } from '@app/models/vehicle-valuation';
 import { saveProviderLog } from '@app/utils/provider-logs';
 import { fetchValuationFromPremiumCarValuation } from '@app/premium-car/premium-car-valuation';
 
-const failureTracker = new FailureTracker();
+const failureTracker = new FailureTracker(0.5);
 
 export function valuationRoutes(fastify: FastifyInstance) {
   fastify.get<{
