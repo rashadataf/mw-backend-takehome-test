@@ -3,7 +3,7 @@ name: Generate UML Diagrams
 on:
   workflow_dispatch:
   push:
-    branches: [ main, master, develop ]
+    branches: [ main, master, development, feature/solution ]
     paths:
       - 'src/**/*.ts'
       - '.github/workflows/generate-uml.yml'
