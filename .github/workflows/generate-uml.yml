@@ -3,59 +3,64 @@ name: Generate UML Diagrams
 on:
   workflow_dispatch:
   push:
-    branches: [ main, master, development, feature/solution ]
+    branches: [ main, master, develop, feature/solution ]
     paths:
       - 'src/**/*.ts'
       - '.github/workflows/generate-uml.yml'
+      - 'docs/diagrams/**/*.puml'
 
 jobs:
-  generate-uml:
+  generate-diagrams:
     runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
-        
-    - name: Install TypeScript UML tools
-      run: npm install -g typescript-uml ts-node typescript
+    permissions:
+      contents: write
 
-    - name: Install Java for PlantUML
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Java
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Install PlantUML
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y graphviz
-        wget https://github.com/plantuml/plantuml/releases/download/v1.2023.10/plantuml-1.2023.10.jar -O plantuml.jar
+    - name: Install Graphviz
+      run: sudo apt-get install -y graphviz
 
-    - name: Generate Class Diagrams
+    - name: Download PlantUML
       run: |
+        curl -L -o plantuml.jar https://github.com/plantuml/plantuml/releases/download/v1.2023.10/plantuml-1.2023.10.jar
         mkdir -p docs/diagrams
-        ts-node -e "
-          const { TSClassDiagramGenerator } = require('typescript-uml');
-          const generator = new TSClassDiagramGenerator();
-          const diagram = generator.generateFromDir(['src/core', 'src/controllers', 'src/services', 'src/repositories'], { outFile: 'docs/diagrams/class-diagram.puml' });
-        "
-        java -jar plantuml.jar docs/diagrams/class-diagram.puml -tpng
 
-    - name: Upload Diagrams
-      uses: actions/upload-artifact@v4
-      with:
-        name: uml-diagrams
-        path: docs/diagrams/
+    - name: Generate UML diagrams
+      run: java -jar plantuml.jar -tpng docs/diagrams/*.puml
 
-    - name: Commit and Push Diagrams
+    - name: Check for changes
+      id: changes
       run: |
         git config --global user.name 'github-actions'
         git config --global user.email 'github-actions@github.com'
-        git add docs/diagrams/
-        git commit -m "docs: update UML diagrams [skip ci]" || echo "No changes to commit"
-        git push 
+        git add docs/diagrams/*.png || echo "No PNG files to add"
+        if git diff-index --quiet HEAD --; then
+          echo "No changes to commit"
+          echo "changed=false" >> "$GITHUB_OUTPUT"
+        else
+          echo "Changes detected"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Commit and push if changes detected
+      if: steps.changes.outputs.changed == 'true'
+      run: |
+        git commit -m 'docs: update UML diagrams [skip ci]'
+        git push
+
+    - name: Upload diagrams as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: uml-diagrams
+        path: docs/diagrams/*.png
+
+    - name: Clean up PlantUML JAR
+      run: rm plantuml.jar 
