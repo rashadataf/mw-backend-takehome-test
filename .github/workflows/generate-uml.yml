@@ -1,0 +1,61 @@
+name: Generate UML Diagrams
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master, develop ]
+    paths:
+      - 'src/**/*.ts'
+      - '.github/workflows/generate-uml.yml'
+
+jobs:
+  generate-uml:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install TypeScript UML tools
+      run: npm install -g typescript-uml ts-node typescript
+
+    - name: Install Java for PlantUML
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Install PlantUML
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y graphviz
+        wget https://github.com/plantuml/plantuml/releases/download/v1.2023.10/plantuml-1.2023.10.jar -O plantuml.jar
+
+    - name: Generate Class Diagrams
+      run: |
+        mkdir -p docs/diagrams
+        ts-node -e "
+          const { TSClassDiagramGenerator } = require('typescript-uml');
+          const generator = new TSClassDiagramGenerator();
+          const diagram = generator.generateFromDir(['src/core', 'src/controllers', 'src/services', 'src/repositories'], { outFile: 'docs/diagrams/class-diagram.puml' });
+        "
+        java -jar plantuml.jar docs/diagrams/class-diagram.puml -tpng
+
+    - name: Upload Diagrams
+      uses: actions/upload-artifact@v3
+      with:
+        name: uml-diagrams
+        path: docs/diagrams/
+
+    - name: Commit and Push Diagrams
+      run: |
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+        git add docs/diagrams/
+        git commit -m "docs: update UML diagrams [skip ci]" || echo "No changes to commit"
+        git push 

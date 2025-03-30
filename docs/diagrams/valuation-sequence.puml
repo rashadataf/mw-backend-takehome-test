@@ -1,0 +1,55 @@
+@startuml Valuation Process Sequence
+
+actor Client
+participant "Fastify App" as App
+participant "ValuationController" as Controller
+participant "ValuationService" as Service
+participant "Database" as DB
+participant "SuperCarValuation API" as SuperCarAPI
+participant "PremiumCarValuation API" as PremiumCarAPI
+
+== GET Existing Valuation ==
+Client -> App: GET /valuation/:vrm
+App -> Controller: getValuation(vrm)
+Controller -> Service: getValuationByVrm(vrm)
+Service -> Service: validateVrm(vrm)
+Service -> DB: findOne(vrm)
+DB --> Service: valuation or null
+alt Valuation Found
+    Service --> Controller: valuation
+    Controller --> Client: 200 OK + valuation data
+else Valuation Not Found
+    Service --> Controller: throw NotFoundError
+    Controller --> Client: 404 Not Found
+end
+
+== PUT New Valuation ==
+Client -> App: PUT /valuation/:vrm (with mileage)
+App -> Controller: createOrUpdateValuation(vrm, mileage)
+Controller -> Service: validateVrm(vrm) & validateMileage(mileage)
+Controller -> Service: getOrCreateValuation(vrm, mileage)
+Service -> DB: findOne(vrm)
+DB --> Service: valuation or null
+
+alt Valuation Found
+    Service --> Controller: existing valuation
+    Controller --> Client: 200 OK + valuation data
+else Valuation Not Found
+    Service -> Service: fetchValuation(vrm, mileage)
+    
+    alt No Failures Tracked
+        Service -> SuperCarAPI: fetchValuationFromSuperCarValuation(vrm, mileage)
+        SuperCarAPI --> Service: valuation data or error
+    else SuperCar API Failing
+        Service -> PremiumCarAPI: fetchValuationFromPremiumCarValuation(vrm, mileage)
+        PremiumCarAPI --> Service: valuation data or error
+    end
+    
+    Service -> DB: save(valuation)
+    DB --> Service: saved valuation
+    Service -> DB: saveProviderLog(provider, response)
+    Service --> Controller: new valuation
+    Controller --> Client: 200 OK + valuation data
+end
+
+@enduml 

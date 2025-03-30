@@ -10,7 +10,7 @@
     "test": "vitest run",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
-    "third-party-api:serve-docs": "node third-party-api/docs.js"
+    "third-party-api:serve-docs": "node third-party-api/docs.mjs"
   },
   "dependencies": {
     "@types/xml2js": "^0.4.14",
