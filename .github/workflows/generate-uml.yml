@@ -13,10 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Setup Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: '18'
         cache: 'npm'
@@ -25,7 +25,7 @@ jobs:
       run: npm install -g typescript-uml ts-node typescript
 
     - name: Install Java for PlantUML
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '17'
@@ -47,7 +47,7 @@ jobs:
         java -jar plantuml.jar docs/diagrams/class-diagram.puml -tpng
 
     - name: Upload Diagrams
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: uml-diagrams
         path: docs/diagrams/
