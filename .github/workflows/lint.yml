@@ -2,9 +2,9 @@ name: Lint Code
 
 on:
   pull_request:
-    branches: [ main, master, development ]
+    branches: [ main, master, development, feature/solution ]
   push:
-    branches: [ main, master, development ]
+    branches: [ main, master, development, feature/solution ]
 
 jobs:
   lint:
