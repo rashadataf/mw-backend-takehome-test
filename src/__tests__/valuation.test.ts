@@ -1,8 +1,8 @@
 import { fastify } from '~root/test/fastify';
-import { VehicleValuationRequest } from '../types/vehicle-valuation-request';
 import { Repository } from 'typeorm';
 import { VehicleValuation } from '@app/models/vehicle-valuation';
 import { Mock } from 'vitest'
+import { VehicleValuationRequest } from '@app/types';
 
 describe('ValuationController (e2e)', () => {
   describe('PUT /valuations/', () => {
@@ -35,9 +35,7 @@ describe('ValuationController (e2e)', () => {
     });
 
     it('should return 400 if mileage is missing', async () => {
-      const requestBody: VehicleValuationRequest = {
-        // @ts-expect-error intentionally malformed payload
-        mileage: null,
+      const requestBody: Partial<VehicleValuationRequest> = {
       };
 
       const res = await fastify.inject({
