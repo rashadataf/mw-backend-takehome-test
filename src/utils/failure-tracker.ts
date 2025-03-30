@@ -1,3 +1,5 @@
+import { config } from '../config';
+
 export class FailureTracker {
     private totalRequests: number;
     private failedRequests: number;
@@ -6,7 +8,10 @@ export class FailureTracker {
     private readonly FAILURE_THRESHOLD: number;
     private readonly FAILOVER_DURATION_MS: number;
 
-    constructor(failureThreshold = 0.5, failoverDurationMs = 5 * 60 * 1000) {
+    constructor(
+        failureThreshold = config.valuation.failover.thresholdRate, 
+        failoverDurationMs = config.valuation.failover.durationMs
+    ) {
         this.totalRequests = 0;
         this.failedRequests = 0;
         this.failoverActive = false;

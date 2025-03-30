@@ -2,8 +2,10 @@ import axios from 'axios';
 
 import { VehicleValuation } from '../models/vehicle-valuation';
 import { SuperCarValuationResponse } from './types/super-car-valuation-response';
+import { config } from '../config';
 
-const SUPER_CAR_API_URL = process.env.SUPER_CAR_API_URL;
+const SUPER_CAR_API_URL = config.valuation.providers.superCar.apiUrl;
+const PROVIDER_NAME = config.valuation.providers.superCar.name;
 
 export async function fetchValuationFromSuperCarValuation(
   vrm: string,
@@ -26,7 +28,7 @@ export async function fetchValuationFromSuperCarValuation(
     valuation.vrm = vrm;
     valuation.lowestValue = response.data.valuation.lowerValue;
     valuation.highestValue = response.data.valuation.upperValue;
-    valuation.provider = 'SuperCar Valuations';
+    valuation.provider = PROVIDER_NAME;
 
     return valuation;
   } catch (error) {

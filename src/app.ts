@@ -3,6 +3,7 @@ import 'reflect-metadata';
 
 import { fastify as Fastify, FastifyServerOptions } from 'fastify';
 import { valuationRoutes } from './routes/valuation';
+import { config } from './config';
 
 import databaseConnection from 'typeorm-fastify-plugin';
 import { VehicleValuation } from './models/vehicle-valuation';
@@ -13,8 +14,8 @@ export const app = (opts?: FastifyServerOptions) => {
   fastify
     .register(databaseConnection, {
       type: 'sqlite',
-      database: process.env.DATABASE_PATH!,
-      synchronize: process.env.SYNC_DATABASE === 'true',
+      database: config.database.path,
+      synchronize: config.database.synchronize,
       logging: false,
       entities: [VehicleValuation, ProviderLog],
       migrations: [],

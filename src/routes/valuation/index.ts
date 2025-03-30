@@ -5,8 +5,12 @@ import { FailureTracker } from '@app/utils/failure-tracker';
 import { VehicleValuation } from '@app/models/vehicle-valuation';
 import { saveProviderLog } from '@app/utils/provider-logs';
 import { fetchValuationFromPremiumCarValuation } from '@app/premium-car/premium-car-valuation';
+import { config } from '@app/config';
 
-const failureTracker = new FailureTracker(0.5);
+const failureTracker = new FailureTracker(
+  config.valuation.failover.thresholdRate,
+  config.valuation.failover.durationMs
+);
 
 export function valuationRoutes(fastify: FastifyInstance) {
   fastify.get<{

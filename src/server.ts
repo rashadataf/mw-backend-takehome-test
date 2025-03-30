@@ -1,17 +1,18 @@
 import { app } from './app';
 import { logger } from './logger';
+import { config } from './config';
 
 const server = app({
   logger,
-  pluginTimeout: 50000,
-  bodyLimit: 15485760,
+  pluginTimeout: config.server.pluginTimeout,
+  bodyLimit: config.server.bodyLimit,
 });
 
 if (import.meta.env.PROD) {
-  const PORT = 3000;
+  const PORT = config.server.port;
   try {
-    server.listen({ port: PORT as number, host: '0.0.0.0' });
-    server.log.info(`Server started on 0.0.0.0:${PORT}`);
+    server.listen({ port: PORT, host: config.server.host });
+    server.log.info(`Server started on ${config.server.host}:${PORT}`);
   } catch (err) {
     server.log.error(err);
     process.exit(1);

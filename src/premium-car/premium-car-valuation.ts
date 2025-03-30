@@ -2,8 +2,10 @@ import axios from 'axios';
 import { parseStringPromise } from 'xml2js';
 import { PremiumCarValuationResponse } from './types';
 import { VehicleValuation } from '@app/models/vehicle-valuation';
+import { config } from '@app/config';
 
-const PREMIUM_CAR_API_URL = process.env.PREMIUM_CAR_API_URL;
+const PREMIUM_CAR_API_URL = config.valuation.providers.premiumCar.apiUrl;
+const PROVIDER_NAME = config.valuation.providers.premiumCar.name;
 
 export async function fetchValuationFromPremiumCarValuation(vrm: string) {
   try {
@@ -18,7 +20,7 @@ export async function fetchValuationFromPremiumCarValuation(vrm: string) {
     valuation.vrm = vrm;
     valuation.lowestValue = parseFloat(result.root.ValuationPrivateSaleMinimum[0]);
     valuation.highestValue = parseFloat(result.root.ValuationPrivateSaleMaximum[0]);
-    valuation.provider = 'Premium Car Valuations';
+    valuation.provider = PROVIDER_NAME;
 
     return valuation;
   } catch (error) {
