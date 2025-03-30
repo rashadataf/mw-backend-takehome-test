@@ -1,70 +1,61 @@
 @startuml Architecture Diagram
 
+' Define rectangle shape
 !define RECTANGLE class
 
+' Application Layer
 package "Application Layer" {
     RECTANGLE "Fastify Application" as App {
-        RECTANGLE "Middlewares" as Middleware {
-            RECTANGLE "Error Handler" as ErrorHandler
-        }
-        
-        RECTANGLE "Controllers" as Controllers {
-            RECTANGLE "ValuationController" as ValuationController
-            RECTANGLE "BaseController" as BaseController
-        }
+        RECTANGLE "Middlewares" as Middleware
+        RECTANGLE "Error Handler" as ErrorHandler
+        RECTANGLE "Controllers" as Controllers
+        RECTANGLE "ValuationController" as ValuationController
+        RECTANGLE "BaseController" as BaseController
     }
 }
 
+' Domain Layer
 package "Domain Layer" {
     RECTANGLE "Core" as Core {
-        RECTANGLE "Abstracts" as Abstracts {
-            RECTANGLE "BaseService" as BaseService
-        }
-        
-        RECTANGLE "Interfaces" as Interfaces {
-            RECTANGLE "IValuationService" as IValuationService
-        }
-        
-        RECTANGLE "Errors" as Errors {
-            RECTANGLE "ApplicationError" as ApplicationError
-            RECTANGLE "ValidationError" as ValidationError
-            RECTANGLE "NotFoundError" as NotFoundError
-            RECTANGLE "ServiceUnavailableError" as ServiceUnavailableError
-        }
+        RECTANGLE "Abstracts" as Abstracts
+        RECTANGLE "BaseService" as BaseService
+        RECTANGLE "Interfaces" as Interfaces
+        RECTANGLE "IValuationService" as IValuationService
+        RECTANGLE "Errors" as Errors
+        RECTANGLE "ApplicationError" as ApplicationError
+        RECTANGLE "ValidationError" as ValidationError
+        RECTANGLE "NotFoundError" as NotFoundError
+        RECTANGLE "ServiceUnavailableError" as ServiceUnavailableError
     }
     
-    RECTANGLE "Models" as Models {
-        RECTANGLE "Valuation" as Valuation
-        RECTANGLE "ProviderLog" as ProviderLog
-    }
+    RECTANGLE "Models" as Models
+    RECTANGLE "Valuation" as Valuation
+    RECTANGLE "ProviderLog" as ProviderLog
 }
 
+' Infrastructure Layer
 package "Infrastructure Layer" {
-    RECTANGLE "Services" as Services {
-        RECTANGLE "ValuationService" as ValuationService
-        RECTANGLE "FailureTracker" as FailureTracker
-    }
+    RECTANGLE "Services" as Services
+    RECTANGLE "ValuationService" as ValuationService
+    RECTANGLE "FailureTracker" as FailureTracker
     
-    RECTANGLE "External Providers" as ExternalProviders {
-        RECTANGLE "SuperCarValuation" as SuperCarValuation
-        RECTANGLE "PremiumCarValuation" as PremiumCarValuation
-    }
+    RECTANGLE "External Providers" as ExternalProviders
+    RECTANGLE "SuperCarValuation" as SuperCarValuation
+    RECTANGLE "PremiumCarValuation" as PremiumCarValuation
     
-    RECTANGLE "Database" as Database {
-        RECTANGLE "TypeORM" as TypeORM
-        RECTANGLE "SQLite" as SQLite
-    }
+    RECTANGLE "Database" as Database
+    RECTANGLE "TypeORM" as TypeORM
+    RECTANGLE "SQLite" as SQLite
 }
 
-package "Types" as Types {
-    RECTANGLE "Requests" as Requests {
-        RECTANGLE "VehicleValuationRequest" as VehicleValuationRequest
-        RECTANGLE "VehicleValuationParams" as VehicleValuationParams
-    }
+' Types Layer
+package "Types" {
+    RECTANGLE "Requests" as Requests
+    RECTANGLE "VehicleValuationRequest" as VehicleValuationRequest
+    RECTANGLE "VehicleValuationParams" as VehicleValuationParams
     
-    RECTANGLE "Responses" as Responses {
-        RECTANGLE "ValuationResponse" as ValuationResponse
-    }
+    RECTANGLE "Responses" as Responses
+    RECTANGLE "ValuationResponse" as ValuationResponse
 }
 
 ' Relationships
