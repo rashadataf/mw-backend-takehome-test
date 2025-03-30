@@ -1,18 +1,20 @@
-const path = require('path');
-const fastify = require('fastify');
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import fastify from 'fastify';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const pathToServeSwaggerUI = 'docs';
 
 const swaggerUIAppForFile = (swaggerSpecPathRelativeToThisFile) => {
     const app = fastify();
     app
-        .register(require('@fastify/swagger'), {
+        .register(import('@fastify/swagger'), {
             mode: 'static',
             specification: {
-                path: path.resolve(__dirname, swaggerSpecPathRelativeToThisFile),
+                path: resolve(__dirname, swaggerSpecPathRelativeToThisFile),
             }
         })
-        .register(require('@fastify/swagger-ui'), {
+        .register(import('@fastify/swagger-ui'), {
             routePrefix: pathToServeSwaggerUI,
         })
         .ready();

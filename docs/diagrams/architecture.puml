@@ -1,0 +1,79 @@
+@startuml Architecture Diagram
+
+' Define rectangle shape
+!define RECTANGLE class
+
+' Application Layer
+package "Application Layer" {
+    RECTANGLE "Fastify Application" as App {
+        RECTANGLE "Middlewares" as Middleware
+        RECTANGLE "Error Handler" as ErrorHandler
+        RECTANGLE "Controllers" as Controllers
+        RECTANGLE "ValuationController" as ValuationController
+        RECTANGLE "BaseController" as BaseController
+    }
+}
+
+' Domain Layer
+package "Domain Layer" {
+    RECTANGLE "Core" as Core {
+        RECTANGLE "Abstracts" as Abstracts
+        RECTANGLE "BaseService" as BaseService
+        RECTANGLE "Interfaces" as Interfaces
+        RECTANGLE "IValuationService" as IValuationService
+        RECTANGLE "Errors" as Errors
+        RECTANGLE "ApplicationError" as ApplicationError
+        RECTANGLE "ValidationError" as ValidationError
+        RECTANGLE "NotFoundError" as NotFoundError
+        RECTANGLE "ServiceUnavailableError" as ServiceUnavailableError
+    }
+    
+    RECTANGLE "Models" as Models
+    RECTANGLE "Valuation" as Valuation
+    RECTANGLE "ProviderLog" as ProviderLog
+}
+
+' Infrastructure Layer
+package "Infrastructure Layer" {
+    RECTANGLE "Services" as Services
+    RECTANGLE "ValuationService" as ValuationService
+    RECTANGLE "FailureTracker" as FailureTracker
+    
+    RECTANGLE "External Providers" as ExternalProviders
+    RECTANGLE "SuperCarValuation" as SuperCarValuation
+    RECTANGLE "PremiumCarValuation" as PremiumCarValuation
+    
+    RECTANGLE "Database" as Database
+    RECTANGLE "TypeORM" as TypeORM
+    RECTANGLE "SQLite" as SQLite
+}
+
+' Types Layer
+package "Types" {
+    RECTANGLE "Requests" as Requests
+    RECTANGLE "VehicleValuationRequest" as VehicleValuationRequest
+    RECTANGLE "VehicleValuationParams" as VehicleValuationParams
+    
+    RECTANGLE "Responses" as Responses
+    RECTANGLE "ValuationResponse" as ValuationResponse
+}
+
+' Relationships
+BaseController <|-- ValuationController
+BaseService <|-- ValuationService
+IValuationService <|.. ValuationService
+ApplicationError <|-- ValidationError
+ApplicationError <|-- NotFoundError
+ApplicationError <|-- ServiceUnavailableError
+
+ValuationController ..> IValuationService : uses
+ValuationService ..> ExternalProviders : calls
+ValuationService ..> Database : persists
+ValuationService ..> FailureTracker : uses
+App ..> Middleware : includes
+Controllers ..> Errors : throws
+Services ..> Models : manages
+ValuationController ..> Types : uses
+ValuationService ..> Types : uses
+
+@enduml 

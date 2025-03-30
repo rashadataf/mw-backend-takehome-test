@@ -119,4 +119,89 @@ The URI for this test stub in Mocky is https://run.mocky.io/v3/0dfda26a-3a5a-43e
 
 
 # Candidate Notes
-Here is a place for you to put any notes regarding the changes you made and the reasoning and what further changes you wish to suggest.
+
+## Changes Made and Their Reasoning
+
+### Test Improvements
+- **Eliminated I/O Operations in Tests**
+  - Mocked database operations to prevent real DB calls during testing
+  - Mocked external API calls for proper isolation
+  - Ensured all tests pass without external dependencies
+
+- **Enhanced Test Coverage**
+  - Added test suite for GET /valuations/:vrm endpoint
+  - Created provider logs tests
+  - Implemented tests for failure-tracker mechanism
+  - Added comprehensive test suite for valuation controller and error handling
+  - Tested application error classes and base controller functionality
+  - Ensured validation, error handling, and happy paths are properly tested
+
+### Architecture Redesign
+- **Controller-Based Architecture**
+  - Implemented clean architecture patterns with core abstractions
+  - Created base controller with common functionality
+  - Added domain-specific error handling
+  - Reorganized routes to use controller pattern
+  - Added direct router registration in app.ts
+
+- **Service Layer Refactoring**
+  - Introduced ValuationService for better separation of concerns
+  - Moved validation logic from BaseController to BaseService
+  - Improved overall code organization and maintainability
+
+- **Configuration Management**
+  - Created centralized config system for better maintainability
+  - Extracted hardcoded values to config module with environment variable fallbacks
+  - Updated server settings, API URLs, failover parameters, and database config
+  - Improved consistency for provider names and settings
+
+### Fallback Provider & Resilience
+- **Premium Car Valuations Integration**
+  - Integrated Premium Car Valuations API as a fallback provider
+  - Implemented XML parsing using `xml2js` to handle API responses
+  - Created `PremiumCarValuationResponse` interface for type safety
+  - Updated valuation logic to include provider name in the response
+
+- **Failover Mechanism**
+  - Implemented failover mechanism between providers
+  - Created failure tracker to monitor API success/failure rates
+  - Added provider logs for audit and debugging
+  - Moved API URLs to environment variables for configuration flexibility
+
+### CI/CD & Documentation
+- **GitHub Actions Workflows**
+  - Added workflows for automated testing and linting
+  - Configured UML diagram generation for documentation
+  - Fixed third-party API documentation server
+
+- **UML Diagrams**
+  - Created architecture diagrams to visualize system structure
+  - Added sequence diagrams to document process flows
+  - Fixed PlantUML syntax issues
+
+## Future Improvements
+
+1. **Enhanced Documentation**
+   - API documentation using OpenAPI/Swagger
+   - More detailed sequence diagrams for all API flows
+
+2. **Performance Optimization**
+   - Add caching layer for frequently requested valuations
+   - Implement request batching for external API calls
+   - Add request/response compression
+
+3. **Expanded Testing**
+   - End-to-end tests with real API simulators
+   - Performance/load testing
+   - Contract tests for external APIs
+
+4. **Additional Features**
+   - Batch valuation processing
+   - More granular valuation data (condition adjustments, etc.)
+   - Historical valuation tracking and comparison
+
+5. **Infrastructure Enhancements**
+   - Containerization with Docker
+   - Distributed failover tracking for multi-instance deployments
+   - Circuit breaker patterns for external services
+   - Metrics collection and monitoring dashboard
